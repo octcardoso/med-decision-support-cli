@@ -127,23 +127,26 @@ void get_indicators(float patients[][7], unsigned short int indicators_amount) {
       
     }
 
-    std::cout << "[Indicador de Saúde] Opções válidas: " << std::endl;
-    std::cout << " +1 - Paciente Saudável" << std::endl;
-    std::cout << " -1 - Paciente Doente" << std::endl;
-    std::cout << "Digite a categoria (+1/-1): ";
-
-    while(true) {
-      patients[patient][HEALTH_CATEGORY_INDEX] = get_user_input(1, 0);
-      
-      if(patients[patient][HEALTH_CATEGORY_INDEX] != -1 && patients[patient][HEALTH_CATEGORY_INDEX] != 1) {
-        std::cout << "Categoria inválida." << std::endl;
-        std::cout << "Use 1 para saudável ou -1 para doente." << std::endl;
-        std::cout << "Digite a categoria (1/-1): ";
-      } else {
-        break;
+    if(patient != MAX_PATIENTS - 1) {
+      std::cout << "[Indicador de Saúde] Opções válidas: " << std::endl;
+      std::cout << " +1 - Paciente Saudável" << std::endl;
+      std::cout << " -1 - Paciente Doente" << std::endl;
+      std::cout << "Digite a categoria (+1/-1): ";
+  
+      while(true) {
+        patients[patient][HEALTH_CATEGORY_INDEX] = get_user_input(1, 0);
+       
+       if(patients[patient][HEALTH_CATEGORY_INDEX] != -1 && patients[patient][HEALTH_CATEGORY_INDEX] != 1) {
+         std::cout << "Categoria inválida." << std::endl;
+         std::cout << "Use 1 para saudável ou -1 para doente." << std::endl;
+         std::cout << "Digite a categoria (1/-1): ";
+       } else {
+         break;
+       }
       }
+    } else {
+      std::cout << "A saúde desse paciente será definida pelo algoritmo." << std::endl;
     }
-
     std::cout << "===================================" << std::endl;
   }
 }
