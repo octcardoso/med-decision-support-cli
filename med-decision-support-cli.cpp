@@ -4,16 +4,16 @@
 #include <string>
 #include <cmath>
 
-bool is_input_valid(std::string input, 
-                    const unsigned short int max_integer_digits, 
-                    const unsigned short int max_decimal_digits);
+bool is_input_valid(std::string &input, 
+                    const unsigned short int &max_integer_digits, 
+                    const unsigned short int &max_decimal_digits);
 
 float get_user_input(const unsigned short int max_integer_digits, 
                      const unsigned short int max_decimal_digits);
 
 void get_indicators_amount(unsigned short int *indicators_amount);
 
-void get_indicators(float patients[][7], unsigned short int indicators_amount);
+void get_indicators(float patients[][7], const unsigned short int *indicators_amount);
 
 double euclidean_distance(const float patient_indicators_a[], 
                           const float patient_indicators_b[], 
@@ -27,7 +27,7 @@ int main() {
   unsigned short int indicators_amount = 0;
   
   get_indicators_amount(&indicators_amount);
-  get_indicators(patients, indicators_amount);
+  get_indicators(patients, &indicators_amount);
   predict_patient_health(patients, &indicators_amount);
 
   return 0;
@@ -72,7 +72,7 @@ float get_user_input(
  * - Quantidade máxima de dígitos nas partes inteira e decimal
  * - Eliminação de zeros insignificantes
  * 
- * @param input String contendo a entrada a ser validada
+ * @param input String da entrada a ser validada
  * @param max_integer_digits Número máximo permitido de dígitos na parte inteira
  * @param max_decimal_digits Número máximo permitido de dígitos na parte decimal
  * @return bool true se a entrada for válida, false caso contrário
@@ -83,19 +83,22 @@ float get_user_input(
  * - Zeros insignificantes à direita na parte decimal são ignorados
  * - Parte decimal de valor zero (ex: ".000") é considerada válida
  */
-bool is_input_valid(std::string input, 
-  const unsigned short int max_integer_digits, 
-  const unsigned short int max_decimal_digits
+bool is_input_valid(std::string &input, 
+  const unsigned short int &max_integer_digits, 
+  const unsigned short int &max_decimal_digits
 ) {
 
   if(input.empty()) return false;
-  
-  if(input[0] == '+' || input[0] == '-') input.erase(0, 1);
 
   bool has_digit = false;
   int dot_count = 0;
+  size_t start_index = 0;
+  
+  if(input[0] == '+' || input[0] == '-') {
+    start_index = 1;
+  }
 
-  for(size_t i = 0; i < input.size(); i++) {
+  for(size_t i = start_index; i < input.size(); i++) {
     if(input[i] == '.') {
       if(dot_count++ > 1) return false;
     } else if(std::isdigit(input[i])) {
@@ -108,7 +111,7 @@ bool is_input_valid(std::string input,
   if(!has_digit) return false;
 
   size_t dot_position = input.find('.');
-  std::string integer = input.substr(0, dot_position);
+  std::string integer = input.substr(start_index, dot_position);
   std::string decimal = (dot_position != std::string::npos) ? input.substr(dot_position + 1) : "";
 
   size_t first_non_zero = integer.find_first_not_of('0');
@@ -175,14 +178,16 @@ void get_indicators_amount(unsigned short int *indicators_amount) {
  *  - Validação da categoria de saúde (+1 ou -1)
  *  - Usa a função get_user_input para validação numérica
  */
-void get_indicators(float patients[][7], unsigned short int indicators_amount) {
+void get_indicators(float patients[][7], 
+  const unsigned short int *indicators_amount
+) {
 
   const unsigned short int MAX_PATIENTS = 11;
-  const unsigned short int HEALTH_CATEGORY_INDEX = indicators_amount - 1;
+  const unsigned short int HEALTH_CATEGORY_INDEX = *indicators_amount - 1;
 
   for(int patient = 0; patient < MAX_PATIENTS; patient++) {
     std::cout << "\n========== PACIENTE " << patient + 1 << "/" << MAX_PATIENTS << " ==========" << std::endl;
-    std::cout << "Insira os " << indicators_amount - 1 << " indicadores:" << std::endl;
+    std::cout << "Insira os " << *indicators_amount - 1 << " indicadores:" << std::endl;
     
     for(int indicator = 0; indicator < HEALTH_CATEGORY_INDEX; indicator++) {
       
@@ -280,7 +285,7 @@ void predict_patient_health(float patients[][7], const unsigned short int *indic
     
   if (conflict) {
     std::cout << "\nAviso: Conflito detectado em distâncias equivalentes!\n";
-    std::cout << "Não foi possível determinar uma classificação única.\n";
+    std::cout << "Não foi possível determinar uma única classificação.\n";
   } else {
     std::cout << "\nPaciente " << (PREDICTION_PATIENT_INDEX + 1) << " classificado como: "
               << (patients[closest_patient][HEALTH_INDEX] == 1 ? "Saudável" : "Doente")
