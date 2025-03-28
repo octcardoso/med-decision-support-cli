@@ -2,6 +2,7 @@
 #include <cctype>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 bool is_input_valid(std::string input, 
                     const unsigned short int max_integer_digits, 
@@ -14,7 +15,9 @@ void get_indicators_amount(unsigned short int *indicators_amount);
 
 void get_indicators(float patients[][7], unsigned short int indicators_amount);
 
-void predict_patient_health(float patients[][7], unsigned short int indicators_amount);
+double euclidean_distance(const float patient_indicators_a[], 
+                          const float patient_indicators_b[], 
+                          const unsigned short int *indicators_amount);
 
 int main() {
   
@@ -23,7 +26,7 @@ int main() {
   
   get_indicators_amount(&indicators_amount);
   get_indicators(patients, indicators_amount);
-  predict_patient_health(patients, indicators_amount);
+  // predict_patient_health(patients, indicators_amount);
 
   return 0;
 }
@@ -32,6 +35,7 @@ float get_user_input(
   const unsigned short int max_integer_digits, 
   const unsigned short int max_decimal_digits
 ) {
+
   std::string user_input;
 
   getline(std::cin, user_input);
@@ -151,9 +155,18 @@ void get_indicators(float patients[][7], unsigned short int indicators_amount) {
   }
 }
 
-void predict_patient_health(float patients[][7], unsigned short int indicators_amount) {
-  // pegar paciente final 
-  // calcular distancia euclidiana dele com todos os outros pacientes
-  // verificar se nas menores distancias, tem alguma distancia igual e com saude diferente
-  // se nao tiver, pegar a menor distancia e determinar a saude do paciente
+double euclidean_distance(const float patient_indicators_a[], 
+  const float patient_indicators_b[], 
+  const unsigned short int *indicators_amount
+) {
+
+  double summation = 0.0;
+  double difference = 0.0;
+
+  for(int indicator = 0; indicator < *indicators_amount; indicator++) {
+    difference = patient_indicators_a[indicator] - patient_indicators_b[indicator];
+    summation += difference * difference;
+  }
+
+  return std::sqrt(summation);
 }
