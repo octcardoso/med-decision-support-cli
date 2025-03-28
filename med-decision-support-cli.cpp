@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include <cctype>
 #include <iomanip>
 #include <string>
@@ -19,6 +20,8 @@ double euclidean_distance(const float patient_indicators_a[],
                           const float patient_indicators_b[], 
                           const unsigned short int *indicators_amount);
 
+void predict_patient_health(float patients[][7], const unsigned short int *indicators_amount);
+
 int main() {
   
   float patients[11][7];
@@ -26,7 +29,7 @@ int main() {
   
   get_indicators_amount(&indicators_amount);
   get_indicators(patients, indicators_amount);
-  // predict_patient_health(patients, indicators_amount);
+  predict_patient_health(patients, &indicators_amount);
 
   return 0;
 }
@@ -169,4 +172,42 @@ double euclidean_distance(const float patient_indicators_a[],
   }
 
   return std::sqrt(summation);
+}
+
+void predict_patient_health(float patients[][7], const unsigned short int *indicators_amount) {
+  const unsigned short int PREDICTION_PATIENT_INDEX = 10;
+  const unsigned short int HEALTH_INDEX = *indicators_amount - 1;
+  const unsigned short int FEATURES_COUNT = *indicators_amount - 1;
+
+  double distance = 0.0;
+  double shortest_distance = std::numeric_limits<double>::max();
+  unsigned short int closest_patient = 0;
+  bool conflict = false;
+
+  for(int patient = 0; patient < PREDICTION_PATIENT_INDEX; patient++) {
+    distance = euclidean_distance(
+      patients[patient],
+      patients[PREDICTION_PATIENT_INDEX],
+      &FEATURES_COUNT
+    );
+
+    if (distance < shortest_distance) {
+      shortest_distance = distance;
+      closest_patient = patient;
+      conflict = false;
+    } else if (distance == shortest_distance) {
+      if (patients[patient][HEALTH_INDEX] != patients[closest_patient][HEALTH_INDEX]) {
+        conflict = true;
+      }
+    }
+  }
+    
+  if (conflict) {
+    std::cout << "\nAviso: Conflito detectado em distâncias equivalentes!\n";
+    std::cout << "Não foi possível determinar uma classificação única.\n";
+  } else {
+    std::cout << "\nPaciente " << (PREDICTION_PATIENT_INDEX + 1) << " classificado como: "
+              << (patients[closest_patient][HEALTH_INDEX] == 1 ? "Saudável" : "Doente")
+              << " ( Baseado no paciente " << (closest_patient + 1) << " )\n";
+  }
 }
