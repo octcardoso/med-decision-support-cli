@@ -1,7 +1,6 @@
 #include <iostream>
 #include <limits>
 #include <cctype>
-#include <iomanip>
 #include <string>
 #include <cmath>
 
@@ -34,6 +33,20 @@ int main() {
   return 0;
 }
 
+/**
+ * @brief Obtém uma entrada numérica do usuário, verifica sua validade, e a converte para float.
+ * 
+ * Repete a solicitação de entrada até que o usuário insira um valor válido, que deve respeitar:
+ * - Um formato numérico válido (ex: "7465.254").
+ * - Limites máximos de dígitos nas partes inteira e decimal.
+ * 
+ * @param max_integer_digits Número máximo de dígitos na parte inteira (antes do ponto decimal).
+ * @param max_decimal_digits Número máximo de dígitos na parte decimal (após o ponto decimal).
+ * @return float Valor numérico validado convertido para tipo float.
+ * @exception std::invalid_argument Se a conversão para float falhar.
+ * 
+ * @note A validação é feita pela função is_input_valid antes da conversão.
+ */
 float get_user_input(
   const unsigned short int max_integer_digits, 
   const unsigned short int max_decimal_digits
@@ -51,6 +64,25 @@ float get_user_input(
   return std::stof(user_input);
 }
 
+/**
+ * @brief Valida se uma string representa um número decimal corretamente formatado.
+ * 
+ * Verifica se:
+ * - Formato numérico válido (dígitos, sinal e ponto decimal)
+ * - Quantidade máxima de dígitos nas partes inteira e decimal
+ * - Eliminação de zeros insignificantes
+ * 
+ * @param input String contendo a entrada a ser validada
+ * @param max_integer_digits Número máximo permitido de dígitos na parte inteira
+ * @param max_decimal_digits Número máximo permitido de dígitos na parte decimal
+ * @return bool true se a entrada for válida, false caso contrário
+ * 
+ * @note Comportamentos especiais:
+ * - Sinais (+/-) são opcionais e removidos antes da validação
+ * - Zeros insignificantes à esquerda na parte inteira são ignorados
+ * - Zeros insignificantes à direita na parte decimal são ignorados
+ * - Parte decimal de valor zero (ex: ".000") é considerada válida
+ */
 bool is_input_valid(std::string input, 
   const unsigned short int max_integer_digits, 
   const unsigned short int max_decimal_digits
@@ -102,6 +134,19 @@ bool is_input_valid(std::string input,
   return true;
 }
 
+/**
+ * @brief Solicita e valida a quantidade de indicadores clínicos por paciente
+ * 
+ * Solicita os indicadores clínicos até que seja fornecido um valor válido entre
+ * 3 a 7 indicadores (3 e 7 considerados). Valores fora deste intervalo são 
+ * rejeitados com uma mensagem de erro e uma nova solicitação.
+ * 
+ * @param indicators_amount Ponteiro para armazenar a quantidade validada
+ * 
+ * @note Características:
+ *  - Valores permitidos: 3 a 7 (inclusive)
+ *  - Entrada validada em um loop até um valor válido
+ */
 void get_indicators_amount(unsigned short int *indicators_amount) {
   std::cout << "Insira a quantidade de indicadores usados por paciente: ";
 
@@ -116,6 +161,20 @@ void get_indicators_amount(unsigned short int *indicators_amount) {
   }
 }
 
+/**
+ * @brief Coleta dados clínicos e a classificação de saúde para um vetor de pacientes
+ * 
+ * A função coleta:
+ * - Indicadores clínicos de cada paciente
+ * - Classificação de saúde (exceto para o último paciente)
+ * 
+ * @param patients Vetor para armazenar os dados dos pacientes
+ * @param indicators_amount Número total de indicadores por paciente (incluindo a categoria de saúde)
+ * 
+ * @note Comportamentos especiais:
+ *  - Validação da categoria de saúde (+1 ou -1)
+ *  - Usa a função get_user_input para validação numérica
+ */
 void get_indicators(float patients[][7], unsigned short int indicators_amount) {
 
   const unsigned short int MAX_PATIENTS = 11;
@@ -158,15 +217,23 @@ void get_indicators(float patients[][7], unsigned short int indicators_amount) {
   }
 }
 
+/**
+ * @brief Calcula a distância euclidiana entre dois vetores de indicadores de pacientes
+ * 
+ * @param patient_indicators_a Vetor de indicadores clínicos
+ * @param patient_indicators_b Vetor de indicadores clínicos
+ * @param indicators_amount Ponteiro para quantidade de indicadores que serão comparados
+ * @return double distância euclidiana entre os dois vetores de indicadores
+ */
 double euclidean_distance(const float patient_indicators_a[], 
   const float patient_indicators_b[], 
-  const unsigned short int *indicators_amount
+  const unsigned short int *count
 ) {
 
   double summation = 0.0;
   double difference = 0.0;
 
-  for(int indicator = 0; indicator < *indicators_amount; indicator++) {
+  for(int indicator = 0; indicator < *count; indicator++) {
     difference = patient_indicators_a[indicator] - patient_indicators_b[indicator];
     summation += difference * difference;
   }
@@ -174,10 +241,19 @@ double euclidean_distance(const float patient_indicators_a[],
   return std::sqrt(summation);
 }
 
+/**
+ * @brief Determina a classificação de saúde do paciente pela menor distância euclidiana
+ * 
+ * @param patients Vetor de pacientes com indicadores e classificação de saúde
+ * @param indicators_amount Número total de indicadores por paciente (incluindo a categoria de saúde)
+ * 
+ * @note 
+ * - Alerta sobre conflito em caso de empate com classificações diferentes
+ */
 void predict_patient_health(float patients[][7], const unsigned short int *indicators_amount) {
   const unsigned short int PREDICTION_PATIENT_INDEX = 10;
   const unsigned short int HEALTH_INDEX = *indicators_amount - 1;
-  const unsigned short int FEATURES_COUNT = *indicators_amount - 1;
+  const unsigned short int INDICATORS_COUNT = *indicators_amount - 1;
 
   double distance = 0.0;
   double shortest_distance = std::numeric_limits<double>::max();
@@ -188,7 +264,7 @@ void predict_patient_health(float patients[][7], const unsigned short int *indic
     distance = euclidean_distance(
       patients[patient],
       patients[PREDICTION_PATIENT_INDEX],
-      &FEATURES_COUNT
+      &INDICATORS_COUNT
     );
 
     if (distance < shortest_distance) {
