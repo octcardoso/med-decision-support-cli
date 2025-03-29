@@ -4,7 +4,7 @@
 #include <string>
 #include <cmath>
 
-bool is_input_valid(std::string &input, 
+bool is_input_valid(const std::string &input, 
                     const unsigned short int &max_integer_digits, 
                     const unsigned short int &max_decimal_digits);
 
@@ -83,7 +83,7 @@ float get_user_input(
  * - Zeros insignificantes à direita na parte decimal são ignorados
  * - Parte decimal de valor zero (ex: ".000") é considerada válida
  */
-bool is_input_valid(std::string &input, 
+bool is_input_valid(const std::string &input, 
   const unsigned short int &max_integer_digits, 
   const unsigned short int &max_decimal_digits
 ) {
